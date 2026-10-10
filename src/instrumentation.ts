@@ -1,5 +1,7 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  const { loadEnvFile } = await import("./lib/env-file");
+  loadEnvFile();
   if (!process.env.DATABASE_URL) {
     console.warn("[orario] DATABASE_URL is not set: accounts and reminders are disabled");
     return;
