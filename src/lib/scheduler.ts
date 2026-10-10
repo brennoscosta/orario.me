@@ -2,10 +2,11 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { getDb, getSql, schema } from "@/db";
 import type { Activity, User } from "@/db/schema";
-import { channelConfigured, sendEmail, sendSms, sendWhatsApp } from "./channels";
+import { configuredChannels, sendEmail, sendSms, sendWhatsApp } from "./channels";
 import { isLocale, type Locale } from "./i18n/config";
 import { reminderMessage } from "./i18n/messages";
-import { isChannel, limitFor, type Channel } from "./plans";
+import { monthlyLimit } from "./limits";
+import { isChannel, type Channel } from "./plans";
 import { usedThisMonth } from "./usage";
 
 const TICK_MS = 30_000;
@@ -17,19 +18,20 @@ type Claimed = { id: string; activity_id: string; user_id: string; channel: stri
 
 /** Picks the channel that will actually carry the reminder, falling back to email. */
 async function resolveChannel(user: User, wanted: Channel): Promise<{ channel: Channel; note: string | null } | null> {
+  const ready = await configuredChannels();
   if (wanted !== "email") {
     let note: string | null = null;
-    if (!channelConfigured(wanted)) note = "channel_unavailable";
+    if (!ready[wanted]) note = "channel_unavailable";
     else if (!user.phone) note = "no_phone";
     else {
-      const limit = limitFor(user.plan, wanted);
+      const limit = await monthlyLimit(user.plan, wanted);
       if (limit !== null && (await usedThisMonth(user.id, wanted)) >= limit) note = "limit_reached";
     }
     if (!note) return { channel: wanted, note: null };
-    if (channelConfigured("email")) return { channel: "email", note };
+    if (ready.email) return { channel: "email", note };
     return null;
   }
-  return channelConfigured("email") ? { channel: "email", note: null } : null;
+  return ready.email ? { channel: "email", note: null } : null;
 }
 
 async function deliver(user: User, activity: Activity, channel: Channel, offsetMinutes: number): Promise<void> {

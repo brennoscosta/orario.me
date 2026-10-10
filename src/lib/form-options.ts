@@ -6,8 +6,8 @@ import type { Locale } from "./i18n/config";
 import { offsetLabel } from "./i18n/labels";
 import { channels, offsetOptions } from "./plans";
 
-export function activityFormOptions(locale: Locale, dict: Dictionary, user: User) {
-  const available = configuredChannels();
+export async function activityFormOptions(locale: Locale, dict: Dictionary, user: User) {
+  const available = await configuredChannels();
   const offsets = offsetOptions.map((m) => ({ value: String(m), label: offsetLabel(m, locale) }));
   const channelOptions = channels.map((c) => {
     const soon = c !== "email" && !available[c];

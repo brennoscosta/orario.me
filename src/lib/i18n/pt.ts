@@ -50,8 +50,8 @@ const pt = {
       soon: "Em breve",
       items: {
         email: { name: "Email", body: "Sem limite de avisos. Ideal para o que pode esperar a próxima olhada na caixa de entrada." },
-        whatsapp: { name: "WhatsApp", body: "Para o que não pode passar. Até 30 avisos por mês no plano gratuito." },
-        sms: { name: "SMS", body: "Chega mesmo sem internet. Até 5 avisos por mês no plano gratuito." },
+        whatsapp: { name: "WhatsApp", body: "Para o que não pode passar. Até {whatsapp} avisos por mês no plano gratuito." },
+        sms: { name: "SMS", body: "Chega mesmo sem internet. Até {sms} avisos por mês no plano gratuito." },
       },
     },
     price: {
@@ -71,7 +71,7 @@ const pt = {
         },
         {
           q: "Quanto custa?",
-          a: "Nada. O plano gratuito inclui compromissos e avisos por email sem limite, 30 avisos por WhatsApp e 5 por SMS a cada mês.",
+          a: "Nada. O plano gratuito inclui compromissos e avisos por email sem limite, {whatsapp} avisos por WhatsApp e {sms} por SMS a cada mês.",
         },
         {
           q: "E se eu viajar para outro fuso horário?",
@@ -155,6 +155,11 @@ const pt = {
     usageOf: (used: number, limit: number) => `${used} de ${limit}`,
     usageSent: (used: number) => `${used} enviados`,
     plan: "Plano gratuito",
+    passwordTitle: "Trocar senha",
+    currentPassword: "Senha atual",
+    newPassword: "Nova senha",
+    changePassword: "Trocar senha",
+    passwordChanged: "Senha alterada. Os outros dispositivos foram desconectados.",
   },
   channels: { email: "Email", whatsapp: "WhatsApp", sms: "SMS" },
   errors: {
@@ -167,6 +172,7 @@ const pt = {
     emailTaken: "Já existe uma conta com este email. Entre com sua senha.",
     phoneInvalid: "Confira o número do celular, com DDD.",
     credentials: "Email ou senha incorretos.",
+    currentPasswordWrong: "A senha atual não confere.",
     titleRequired: "Dê um nome ao compromisso.",
     dateInvalid: "Informe o dia e a hora do compromisso.",
     timezoneInvalid: "Escolha um fuso horário válido.",

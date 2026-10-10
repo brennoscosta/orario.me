@@ -37,7 +37,7 @@ export default async function EditActivityPage({ params }: { params: Promise<{ l
     .orderBy(asc(schema.reminders.sendAt));
 
   const dict = getDict(locale);
-  const options = activityFormOptions(locale, dict, user);
+  const options = await activityFormOptions(locale, dict, user);
   return (
     <main id="main" className="sheet sheet--wide">
       <h1 className="display">{dict.form.titleEdit}</h1>

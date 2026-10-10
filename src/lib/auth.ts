@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { cookies } from "next/headers";
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt, lt, ne } from "drizzle-orm";
 import { cache } from "react";
 import { getDb, schema } from "@/db";
 import type { User } from "@/db/schema";
@@ -45,6 +45,16 @@ export async function createSession(userId: string): Promise<void> {
     path: "/",
     expires: expiresAt,
   });
+}
+
+/** Signs out every other device of the user, keeping the current session. */
+export async function destroyOtherSessions(userId: string): Promise<void> {
+  const jar = await cookies();
+  const token = jar.get(COOKIE)?.value;
+  const current = token ? tokenId(token) : "";
+  await getDb()
+    .delete(schema.sessions)
+    .where(and(eq(schema.sessions.userId, userId), ne(schema.sessions.id, current)));
 }
 
 export async function destroySession(): Promise<void> {

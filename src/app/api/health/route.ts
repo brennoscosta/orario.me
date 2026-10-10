@@ -13,5 +13,5 @@ export async function GET() {
       database = false;
     }
   }
-  return Response.json({ ok: true, database, channels: configuredChannels() });
+  return Response.json({ ok: true, database, channels: await configuredChannels() });
 }

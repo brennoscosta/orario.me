@@ -20,7 +20,7 @@ export default async function NewActivityPage({ params }: { params: Promise<{ lo
   const user = await getUser();
   if (!user) redirect(`/${locale}/login`);
   const dict = getDict(locale);
-  const options = activityFormOptions(locale, dict, user);
+  const options = await activityFormOptions(locale, dict, user);
   return (
     <main id="main" className="sheet sheet--wide">
       <h1 className="display">{dict.form.titleNew}</h1>

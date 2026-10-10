@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Footer, Header } from "@/components/Header";
 import { getUser } from "@/lib/auth";
 import { configuredChannels } from "@/lib/channels";
+import { monthlyLimit } from "@/lib/limits";
 import { getDict } from "@/lib/i18n";
 import { isLocale, SITE_URL } from "@/lib/i18n/config";
 import { channels } from "@/lib/plans";
@@ -24,7 +25,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const dict = getDict(locale);
   const t = dict.home;
   const user = await getUser();
-  const available = configuredChannels();
+  const available = await configuredChannels();
+  const waLimit = (await monthlyLimit("free", "whatsapp")) ?? 0;
+  const smsLimit = (await monthlyLimit("free", "sms")) ?? 0;
+  const fill = (text: string) => text.replace("{whatsapp}", String(waLimit)).replace("{sms}", String(smsLimit));
   const startHref = user ? `/${locale}/app` : `/${locale}/signup`;
 
   const jsonLd = [
@@ -45,7 +49,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       mainEntity: t.faq.items.map((item) => ({
         "@type": "Question",
         name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a },
+        acceptedAnswer: { "@type": "Answer", text: fill(item.a) },
       })),
     },
   ];
@@ -113,7 +117,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                     {t.channels.items[channel].name}
                     {!available[channel] && <span className="tag">{t.channels.soon}</span>}
                   </h3>
-                  <p>{t.channels.items[channel].body}</p>
+                  <p>{fill(t.channels.items[channel].body)}</p>
                 </li>
               ))}
             </ul>
@@ -134,7 +138,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               {t.faq.items.map((item) => (
                 <details key={item.q}>
                   <summary>{item.q}</summary>
-                  <p>{item.a}</p>
+                  <p>{fill(item.a)}</p>
                 </details>
               ))}
             </div>

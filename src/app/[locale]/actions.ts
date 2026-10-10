@@ -4,7 +4,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb, schema } from "@/db";
-import { createSession, destroySession, getUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { createSession, destroyOtherSessions, destroySession, getUser, hashPassword, verifyPassword } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 import { normalizePhone } from "@/lib/phone";
@@ -245,5 +245,25 @@ export async function saveSettings(_prev: FormState, form: FormData): Promise<Fo
   }
   if (newLocale !== locale) redirect(`/${newLocale}/app/settings?saved=1`);
   revalidatePath(`/${locale}/app`, "layout");
+  return { ok: true };
+}
+
+export async function changePassword(_prev: FormState, form: FormData): Promise<FormState> {
+  const locale = localeOf(form);
+  const t = getDict(locale).errors;
+  const user = await getUser();
+  if (!user) redirect(`/${locale}/login`);
+  if (!(await allow("password", 8, 10 * 60_000))) return { error: t.rateLimited };
+  const current = String(form.get("currentPassword") ?? "");
+  const next = String(form.get("newPassword") ?? "");
+  if (!(await verifyPassword(current, user.passwordHash))) return { error: t.currentPasswordWrong };
+  if (next.length < 8 || next.length > 200) return { error: t.passwordShort };
+  try {
+    await getDb().update(schema.users).set({ passwordHash: await hashPassword(next) }).where(eq(schema.users.id, user.id));
+    await destroyOtherSessions(user.id);
+  } catch (err) {
+    console.error("[orario] changePassword failed:", err);
+    return { error: t.generic };
+  }
   return { ok: true };
 }

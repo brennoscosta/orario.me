@@ -52,8 +52,8 @@ const en: Dictionary = {
       soon: "Coming soon",
       items: {
         email: { name: "Email", body: "Unlimited reminders. Right for what can wait until you next check your inbox." },
-        whatsapp: { name: "WhatsApp", body: "For what can't be missed. Up to 30 reminders a month on the free plan." },
-        sms: { name: "SMS", body: "Arrives even without internet. Up to 5 reminders a month on the free plan." },
+        whatsapp: { name: "WhatsApp", body: "For what can't be missed. Up to {whatsapp} reminders a month on the free plan." },
+        sms: { name: "SMS", body: "Arrives even without internet. Up to {sms} reminders a month on the free plan." },
       },
     },
     price: {
@@ -73,7 +73,7 @@ const en: Dictionary = {
         },
         {
           q: "How much does it cost?",
-          a: "Nothing. The free plan includes unlimited appointments and email reminders, plus 30 WhatsApp and 5 SMS reminders each month.",
+          a: "Nothing. The free plan includes unlimited appointments and email reminders, plus {whatsapp} WhatsApp and {sms} SMS reminders each month.",
         },
         {
           q: "What if I travel to another time zone?",
@@ -157,6 +157,11 @@ const en: Dictionary = {
     usageOf: (used: number, limit: number) => `${used} of ${limit}`,
     usageSent: (used: number) => `${used} sent`,
     plan: "Free plan",
+    passwordTitle: "Change password",
+    currentPassword: "Current password",
+    newPassword: "New password",
+    changePassword: "Change password",
+    passwordChanged: "Password changed. Other devices were signed out.",
   },
   channels: { email: "Email", whatsapp: "WhatsApp", sms: "SMS" },
   errors: {
@@ -169,6 +174,7 @@ const en: Dictionary = {
     emailTaken: "An account with this email already exists. Sign in with your password.",
     phoneInvalid: "Check the mobile number, including the country code.",
     credentials: "Incorrect email or password.",
+    currentPasswordWrong: "The current password doesn't match.",
     titleRequired: "Give the appointment a name.",
     dateInvalid: "Enter the day and time of the appointment.",
     timezoneInvalid: "Choose a valid time zone.",

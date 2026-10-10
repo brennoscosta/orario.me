@@ -21,7 +21,11 @@ Depois de mudar `src/db/schema.ts`, gere a migração com `npm run db:generate`.
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. Só `DATABASE_URL` é obrigatória; cada canal de lembrete liga quando suas variáveis estão preenchidas. Sem um canal configurado, o aviso segue por email.
+Veja `.env.example`. Só `DATABASE_URL` é obrigatória. As credenciais dos canais (SMTP, Evolution API, Twilio) e os limites do plano são preenchidos no painel admin; as variáveis de ambiente servem de reserva. Quando WhatsApp ou SMS não podem ser usados, o aviso segue por email.
+
+## Painel admin
+
+`/pt/admin`, visível só para as contas listadas em `ADMIN_EMAILS`: visão geral, canais (com envio de teste), usuários e registro de lembretes.
 
 ## Deploy (CapRover)
 

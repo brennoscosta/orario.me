@@ -80,6 +80,13 @@ export const deliveries = pgTable(
   (t) => [index("deliveries_user_idx").on(t.userId, t.channel, t.sentAt)],
 );
 
+/** Site-wide configuration edited in the admin panel (channel credentials, limits). */
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type Reminder = typeof reminders.$inferSelect;

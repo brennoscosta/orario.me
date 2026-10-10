@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logout } from "@/app/[locale]/actions";
 import type { User } from "@/db/schema";
+import { isAdmin } from "@/lib/admin";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/config";
 import { LocaleSwitch } from "./LocaleSwitch";
@@ -18,6 +19,7 @@ export function Header({ locale, dict, user }: { locale: Locale; dict: Dictionar
           <>
             <Link href={`/${locale}/app`}>{t.agenda}</Link>
             <Link href={`/${locale}/app/settings`}>{t.settings}</Link>
+            {isAdmin(user) && <Link href="/pt/admin">Admin</Link>}
             <form action={logout}>
               <input type="hidden" name="locale" value={locale} />
               <button type="submit" className="linklike">
