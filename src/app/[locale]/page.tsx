@@ -65,9 +65,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             <Link href={startHref} className="button">
               {user ? dict.nav.agenda : t.cta}
             </Link>
-            {!user && <Link href={`/${locale}/login`}>{t.ctaSecondary}</Link>}
+            {!user && <span className="hero-note">{t.ctaNote}</span>}
           </div>
-          {!user && <p className="hero-note">{t.ctaNote}</p>}
 
           <figure className="carte-wrap" aria-label={t.carte.label}>
             <div className="carte">
@@ -92,66 +91,36 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           </figure>
         </section>
 
-        <section className="band">
-          <div className="inner">
-            <h2 className="display">{t.steps.title}</h2>
-            <ol className="steps">
-              {t.steps.items.map((step) => (
-                <li key={step.title}>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </li>
-              ))}
-            </ol>
+        <section className="creed">
+          <h2 className="display">{t.creed.title}</h2>
+          <p>{t.creed.body}</p>
+          <ul aria-label={dict.form.channel}>
+            {channels.map((channel) => (
+              <li key={channel}>
+                {dict.channels[channel]}
+                {!available[channel] && <span className="tag">{t.creed.soon}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="quiet-faq">
+          <h2>{t.faq.title}</h2>
+          <div className="faq">
+            {t.faq.items.map((item) => (
+              <details key={item.q}>
+                <summary>{item.q}</summary>
+                <p>{fill(item.a)}</p>
+              </details>
+            ))}
           </div>
         </section>
 
-        <section className="band band--white">
-          <div className="inner">
-            <h2 className="display">{t.channels.title}</h2>
-            <p className="intro">{t.channels.lead}</p>
-            <ul className="channel-list">
-              {channels.map((channel) => (
-                <li key={channel}>
-                  <h3>
-                    {t.channels.items[channel].name}
-                    {!available[channel] && <span className="tag">{t.channels.soon}</span>}
-                  </h3>
-                  <p>{fill(t.channels.items[channel].body)}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="band statement">
-          <div className="inner">
-            <h2 className="display">{t.price.title}</h2>
-            <p className="intro">{t.price.body}</p>
-          </div>
-        </section>
-
-        <section className="band band--white">
-          <div className="inner faq-layout">
-            <h2 className="display">{t.faq.title}</h2>
-            <div className="faq">
-              {t.faq.items.map((item) => (
-                <details key={item.q}>
-                  <summary>{item.q}</summary>
-                  <p>{fill(item.a)}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="band statement">
-          <div className="inner">
-            <h2 className="display">{t.closing.title}</h2>
-            <Link href={startHref} className="button">
-              {user ? dict.nav.agenda : t.closing.cta}
-            </Link>
-          </div>
+        <section className="creed creed--closing">
+          <h2 className="display">{t.closing.title}</h2>
+          <Link href={startHref} className="button">
+            {user ? dict.nav.agenda : t.closing.cta}
+          </Link>
         </section>
       </main>
       <Footer dict={dict} />

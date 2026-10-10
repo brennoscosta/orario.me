@@ -16,11 +16,10 @@ const en: Dictionary = {
     skip: "Skip to content",
   },
   home: {
-    h1: "You don't have to remember. Orario will tell you.",
-    lead: "Write the appointment down once and choose when you want to hear about it. The reminder arrives by email, SMS or WhatsApp, at the time you asked for.",
+    h1: "You don't remember. You are reminded.",
+    lead: "Write the appointment down once. Orario tells you at the right moment, by email, WhatsApp or SMS.",
     cta: "Create my agenda",
-    ctaSecondary: "I have an account",
-    ctaNote: "Free. Takes a minute.",
+    ctaNote: "Free.",
     carte: {
       label: "A sample day in Orario",
       day: "Saturday, October 10",
@@ -32,56 +31,29 @@ const en: Dictionary = {
       bubbleMeta: "WhatsApp, 8:30 AM",
       bubble: "Pardon the interruption, Marina. Coffee with Helena starts in 30 minutes, at 9:00 AM.",
     },
-    steps: {
-      title: "Three gestures, and we take it from there",
-      items: [
-        { title: "Write the appointment down", body: "Title, day and time. Place and notes, if you like." },
-        {
-          title: "Say when to remind you",
-          body: "On the hour, ten minutes before, the day before. Up to four reminders per appointment, each on the channel you prefer.",
-        },
-        {
-          title: "Get the reminder",
-          body: "The message reaches you where you already are, with what it is, when it is and where it is.",
-        },
-      ],
-    },
-    channels: {
-      title: "The reminder comes to you",
-      lead: "You choose the channel for each reminder. Nothing to install.",
-      soon: "Coming soon",
-      items: {
-        email: { name: "Email", body: "Unlimited reminders. Right for what can wait until you next check your inbox." },
-        whatsapp: { name: "WhatsApp", body: "For what can't be missed. Up to {whatsapp} reminders a month on the free plan." },
-        sms: { name: "SMS", body: "Arrives even without internet. Up to {sms} reminders a month on the free plan." },
-      },
-    },
-    price: {
-      title: "Orario is free",
-      body: "Unlimited appointments and unlimited email reminders. WhatsApp and SMS have a monthly allowance; once it runs out, the reminder goes by email so you are never left without one.",
+    creed: {
+      title: "Write it down. Pick the time. Show up.",
+      body: "Up to four reminders per appointment and, every morning, the count of days to go. We take it from there.",
+      soon: "coming soon",
     },
     faq: {
       title: "Frequently asked questions",
       items: [
         {
           q: "Do I need to install an app?",
-          a: "No. Orario runs in the browser on your phone or computer, and reminders arrive in the apps you already use.",
-        },
-        {
-          q: "Can I get more than one reminder for the same appointment?",
-          a: "Yes. Each appointment takes up to four reminders, with different lead times and channels. For example: an email the day before and a WhatsApp message half an hour ahead.",
+          a: "No. Orario runs in the browser, and reminders arrive in the apps you already use.",
         },
         {
           q: "How much does it cost?",
-          a: "Nothing. The free plan includes unlimited appointments and email reminders, plus {whatsapp} WhatsApp and {sms} SMS reminders each month.",
+          a: "Nothing. Unlimited appointments and email reminders, plus {whatsapp} WhatsApp and {sms} SMS reminders each month.",
         },
         {
-          q: "What if I travel to another time zone?",
-          a: "Your appointments stay in the time zone you chose when you created the account. You can change it in settings whenever you like.",
+          q: "Can I get more than one reminder for the same appointment?",
+          a: "Yes, up to four, each with the lead time and channel you choose.",
         },
       ],
     },
-    closing: { title: "Your next week, with nothing forgotten.", cta: "Create my agenda" },
+    closing: { title: "The rest of the day is yours.", cta: "Create my agenda" },
   },
   footer: { tagline: "A personal agenda with reminders.", rights: "All rights reserved." },
   auth: {

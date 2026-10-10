@@ -14,11 +14,10 @@ const pt = {
     skip: "Ir para o conteúdo",
   },
   home: {
-    h1: "Você não precisa lembrar. A Orario avisa.",
-    lead: "Anote o compromisso uma vez e escolha quando quer ser avisado. O lembrete chega por email, SMS ou WhatsApp, na hora que você pediu.",
+    h1: "Você não se lembra. Você é lembrado.",
+    lead: "Anote o compromisso uma vez. A Orario avisa na hora certa, por email, WhatsApp ou SMS.",
     cta: "Criar minha agenda",
-    ctaSecondary: "Já tenho conta",
-    ctaNote: "Gratuito. Leva um minuto.",
+    ctaNote: "Gratuito.",
     carte: {
       label: "Exemplo de um dia na Orario",
       day: "Sábado, 10 de outubro",
@@ -30,56 +29,29 @@ const pt = {
       bubbleMeta: "WhatsApp, 08:30",
       bubble: "Com licença, Marina. Café com a Helena começa em 30 minutos, às 09:00.",
     },
-    steps: {
-      title: "Três gestos, e o resto é conosco",
-      items: [
-        { title: "Anote o compromisso", body: "Título, dia e hora. Local e observações, se quiser." },
-        {
-          title: "Diga quando avisar",
-          body: "Na hora, dez minutos antes, na véspera. Até quatro avisos por compromisso, cada um no canal que preferir.",
-        },
-        {
-          title: "Receba o aviso",
-          body: "A mensagem chega onde você já está, com o que é, quando é e onde é.",
-        },
-      ],
-    },
-    channels: {
-      title: "O aviso vai até você",
-      lead: "Você escolhe o canal de cada lembrete. Nada para instalar.",
-      soon: "Em breve",
-      items: {
-        email: { name: "Email", body: "Sem limite de avisos. Ideal para o que pode esperar a próxima olhada na caixa de entrada." },
-        whatsapp: { name: "WhatsApp", body: "Para o que não pode passar. Até {whatsapp} avisos por mês no plano gratuito." },
-        sms: { name: "SMS", body: "Chega mesmo sem internet. Até {sms} avisos por mês no plano gratuito." },
-      },
-    },
-    price: {
-      title: "A Orario é gratuita",
-      body: "Compromissos sem limite e avisos por email sem limite. WhatsApp e SMS têm uma cota mensal; quando ela acaba, o aviso segue por email para você não ficar sem.",
+    creed: {
+      title: "Anote. Escolha a hora. Apareça.",
+      body: "Até quatro avisos por compromisso e, toda manhã, a contagem dos dias que faltam. O resto é conosco.",
+      soon: "em breve",
     },
     faq: {
       title: "Perguntas frequentes",
       items: [
         {
           q: "Preciso instalar algum aplicativo?",
-          a: "Não. A Orario funciona no navegador do celular ou do computador, e os lembretes chegam nos aplicativos que você já usa.",
-        },
-        {
-          q: "Posso receber mais de um aviso para o mesmo compromisso?",
-          a: "Sim. Cada compromisso aceita até quatro avisos, com antecedências e canais diferentes. Por exemplo: um email na véspera e um WhatsApp meia hora antes.",
+          a: "Não. A Orario funciona no navegador, e os avisos chegam nos aplicativos que você já usa.",
         },
         {
           q: "Quanto custa?",
-          a: "Nada. O plano gratuito inclui compromissos e avisos por email sem limite, {whatsapp} avisos por WhatsApp e {sms} por SMS a cada mês.",
+          a: "Nada. Compromissos e avisos por email sem limite, mais {whatsapp} avisos por WhatsApp e {sms} por SMS a cada mês.",
         },
         {
-          q: "E se eu viajar para outro fuso horário?",
-          a: "Seus compromissos ficam no fuso que você escolheu ao criar a conta. Você pode trocá-lo nas configurações quando quiser.",
+          q: "Posso receber mais de um aviso para o mesmo compromisso?",
+          a: "Sim, até quatro, cada um com a antecedência e o canal que você escolher.",
         },
       ],
     },
-    closing: { title: "Sua próxima semana, sem esquecimentos.", cta: "Criar minha agenda" },
+    closing: { title: "O resto do dia é seu.", cta: "Criar minha agenda" },
   },
   footer: { tagline: "Agenda pessoal com lembretes.", rights: "Todos os direitos reservados." },
   auth: {
