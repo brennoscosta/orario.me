@@ -30,12 +30,11 @@ export default async function NewActivityPage({ params }: { params: Promise<{ lo
         offsets={options.offsets}
         channels={options.channels}
         maxReminders={MAX_REMINDERS_PER_ACTIVITY}
+        fields={options.fields}
         initial={{
           title: "",
           date: dayKey(new Date(), user.timezone),
           time: "",
-          location: "",
-          notes: "",
           reminders: [{ offset: "30", channel: "email" }],
         }}
         note={

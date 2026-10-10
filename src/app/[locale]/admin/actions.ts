@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getDb, schema } from "@/db";
 import { isAdmin, requireAdmin } from "@/lib/admin";
 import { configuredChannels, sendEmail, sendSms, sendWhatsApp } from "@/lib/channels";
+import { testMessage } from "@/lib/i18n/messages";
 import { isChannel } from "@/lib/plans";
 import { saveSettings } from "@/lib/settings";
 
@@ -12,11 +13,19 @@ export type AdminState = { error?: string; ok?: string };
 
 const text = (form: FormData, name: string, max = 300) => String(form.get(name) ?? "").trim().slice(0, max);
 
-/** Field names per channel. `secret` fields keep their saved value when submitted blank. */
+/** Form field -> settings key, per channel. Secret fields keep their saved value when submitted blank. */
 const channelFields = {
-  email: { prefix: "smtp", plain: ["host", "port", "user", "from"], secret: ["pass"] },
-  whatsapp: { prefix: "whatsapp", plain: ["url", "instance"], secret: ["key"] },
-  sms: { prefix: "sms", plain: ["sid", "from"], secret: ["token"] },
+  email: {
+    enabled: "smtp.enabled",
+    plain: { provider: "email.provider", from: "email.from", host: "smtp.host", port: "smtp.port", user: "smtp.user" },
+    secret: { sendgridKey: "sendgrid.key", pass: "smtp.pass" },
+  },
+  whatsapp: {
+    enabled: "whatsapp.enabled",
+    plain: { url: "whatsapp.url", instance: "whatsapp.instance" },
+    secret: { key: "whatsapp.key" },
+  },
+  sms: { enabled: "sms.enabled", plain: { sid: "sms.sid", from: "sms.from" }, secret: { token: "sms.token" } },
 } as const;
 
 export async function saveChannel(_prev: AdminState, form: FormData): Promise<AdminState> {
@@ -25,16 +34,20 @@ export async function saveChannel(_prev: AdminState, form: FormData): Promise<Ad
   if (!isChannel(channel)) return { error: "Canal desconhecido." };
   const spec = channelFields[channel];
   const entries: Record<string, string> = {};
-  for (const name of spec.plain) entries[`${spec.prefix}.${name}`] = text(form, name);
-  for (const name of spec.secret) {
+  for (const [name, key] of Object.entries(spec.plain)) entries[key] = text(form, name);
+  for (const [name, key] of Object.entries(spec.secret)) {
     const value = text(form, name, 500);
-    if (value) entries[`${spec.prefix}.${name}`] = value;
+    if (value) entries[key] = value;
   }
-  entries[`${spec.prefix}.enabled`] = form.get("enabled") === "on" ? "1" : "0";
+  entries[spec.enabled] = form.get("enabled") === "on" ? "1" : "0";
 
   if (channel === "email") {
     const port = entries["smtp.port"];
     if (port && !/^\d{2,5}$/.test(port)) return { error: "A porta precisa ser um número, como 587 ou 465." };
+    if (!["sendgrid", "smtp"].includes(entries["email.provider"])) entries["email.provider"] = "sendgrid";
+    if (entries["email.from"] && !/[^\s@<]+@[^\s@>]+\.[^\s@>]+/.test(entries["email.from"])) {
+      return { error: "O remetente precisa conter um endereço de email, como Orario <lembretes@orario.me>." };
+    }
   }
   if (channel === "whatsapp" && entries["whatsapp.url"] && !/^https?:\/\//.test(entries["whatsapp.url"])) {
     return { error: "O endereço da Evolution API precisa começar com http:// ou https://." };
@@ -45,7 +58,7 @@ export async function saveChannel(_prev: AdminState, form: FormData): Promise<Ad
     console.error("[orario] saveChannel failed:", err);
     return { error: "Não foi possível salvar. Tente novamente." };
   }
-  revalidatePath("/pt/admin", "layout");
+  revalidatePath("/", "layout");
   const ready = (await configuredChannels())[channel];
   return { ok: ready ? "Salvo. O canal está ativo." : "Salvo. O canal ainda não está ativo: confira os campos obrigatórios." };
 }
@@ -55,15 +68,11 @@ export async function testChannel(_prev: AdminState, form: FormData): Promise<Ad
   const channel = text(form, "channel", 20);
   if (!isChannel(channel)) return { error: "Canal desconhecido." };
   if (!(await configuredChannels())[channel]) return { error: "Salve as credenciais e ative o canal antes de testar." };
-  const message = "Teste da Orario: este canal está funcionando.";
+  const test = testMessage();
+  const message = test.short;
   try {
     if (channel === "email") {
-      await sendEmail({
-        to: admin.email,
-        subject: "Teste da Orario",
-        text: message,
-        html: `<p style="font-family:Helvetica,Arial,sans-serif;font-size:15px">${message}</p>`,
-      });
+      await sendEmail({ to: admin.email, subject: test.subject, text: test.text, html: test.html });
       return { ok: `Email de teste enviado para ${admin.email}.` };
     }
     if (!admin.phone) return { error: "Cadastre seu celular em Configurações para receber o teste." };

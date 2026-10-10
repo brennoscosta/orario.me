@@ -4,7 +4,16 @@ import type { Channel } from "./plans";
 import { getSettings } from "./settings";
 
 export type ChannelConfig = {
-  email: { enabled: boolean; host: string; port: number; user: string; pass: string; from: string };
+  email: {
+    enabled: boolean;
+    provider: "sendgrid" | "smtp";
+    from: string;
+    sendgridKey: string;
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+  };
   whatsapp: { enabled: boolean; url: string; key: string; instance: string };
   sms: { enabled: boolean; sid: string; token: string; from: string };
 };
@@ -15,14 +24,20 @@ export async function getChannelConfig(): Promise<ChannelConfig> {
   const e = process.env;
   const pick = (key: string, env: string | undefined) => s.get(key) ?? env ?? "";
   const on = (key: string) => s.get(key) !== "0";
+  const sendgridKey = pick("sendgrid.key", e.SENDGRID_API_KEY);
+  const smtpHost = pick("smtp.host", e.SMTP_HOST);
+  const chosen = pick("email.provider", e.EMAIL_PROVIDER);
+  const provider = chosen === "smtp" || chosen === "sendgrid" ? chosen : smtpHost && !sendgridKey ? "smtp" : "sendgrid";
   return {
     email: {
       enabled: on("smtp.enabled"),
-      host: pick("smtp.host", e.SMTP_HOST),
+      provider,
+      sendgridKey,
+      host: smtpHost,
       port: Number(pick("smtp.port", e.SMTP_PORT) || 587),
       user: pick("smtp.user", e.SMTP_USER),
       pass: pick("smtp.pass", e.SMTP_PASS),
-      from: pick("smtp.from", e.MAIL_FROM),
+      from: s.get("email.from") ?? pick("smtp.from", e.MAIL_FROM),
     },
     whatsapp: {
       enabled: on("whatsapp.enabled"),
@@ -40,7 +55,10 @@ export async function getChannelConfig(): Promise<ChannelConfig> {
 }
 
 export function isReady(config: ChannelConfig, channel: Channel): boolean {
-  if (channel === "email") return Boolean(config.email.enabled && config.email.host && config.email.from);
+  if (channel === "email") {
+    const m = config.email;
+    return Boolean(m.enabled && m.from && (m.provider === "sendgrid" ? m.sendgridKey : m.host));
+  }
   if (channel === "whatsapp") {
     const w = config.whatsapp;
     return Boolean(w.enabled && w.url && w.key && w.instance);
@@ -75,9 +93,36 @@ function transporterFor(c: ChannelConfig["email"]): Transporter {
   return mailer.transporter;
 }
 
+/** Splits "Orario <lembretes@orario.me>" into name and address. */
+function parseFrom(from: string): { email: string; name?: string } {
+  const match = from.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+  if (!match) return { email: from.trim() };
+  return match[1].trim() ? { email: match[2].trim(), name: match[1].trim() } : { email: match[2].trim() };
+}
+
+async function sendViaSendGrid(c: ChannelConfig["email"], msg: { to: string; subject: string; text: string; html: string }) {
+  const base = (process.env.SENDGRID_API_URL || "https://api.sendgrid.com").replace(/\/$/, "");
+  const res = await fetch(`${base}/v3/mail/send`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${c.sendgridKey}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: msg.to }] }],
+      from: parseFrom(c.from),
+      subject: msg.subject,
+      content: [
+        { type: "text/plain", value: msg.text },
+        { type: "text/html", value: msg.html },
+      ],
+    }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  await expectOk(res, "sendgrid");
+}
+
 export async function sendEmail(msg: { to: string; subject: string; text: string; html: string }): Promise<void> {
   const { email } = await getChannelConfig();
-  await transporterFor(email).sendMail({ from: email.from, ...msg });
+  if (email.provider === "sendgrid") await sendViaSendGrid(email, msg);
+  else await transporterFor(email).sendMail({ from: email.from, ...msg });
 }
 
 async function expectOk(res: Response, provider: string): Promise<void> {

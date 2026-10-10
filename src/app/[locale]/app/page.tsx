@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { deleteActivity } from "../actions";
 import { getDb, schema } from "@/db";
 import type { Reminder } from "@/db/schema";
+import { activityDetails, loadExtraDetails } from "@/lib/activity-fields";
 import { getUser } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { isLocale } from "@/lib/i18n/config";
@@ -70,6 +71,7 @@ export default async function AgendaPage({
     }
   }
 
+  const extras = await loadExtraDetails(activities.map((a) => a.id), locale);
   const days: { key: string; items: typeof activities }[] = [];
   for (const activity of activities) {
     const key = dayKey(activity.startsAt, tz);
@@ -129,8 +131,11 @@ export default async function AgendaPage({
                     <span className="entry-time">{timeOfDay(activity.startsAt, tz, locale)}</span>
                     <div>
                       <p className="entry-title">{activity.title}</p>
-                      {activity.location && <p className="entry-meta">{activity.location}</p>}
-                      {activity.notes && <p className="entry-meta">{activity.notes}</p>}
+                      {activityDetails(activity, locale, extras.get(activity.id)).map((d) => (
+                        <p className="entry-meta" key={d.key}>
+                          {d.plain ? d.value : `${d.label}: ${d.value}`}
+                        </p>
+                      ))}
                     </div>
                     <div className="entry-actions">
                       <Link href={`/${locale}/app/${activity.id}`}>{t.edit}</Link>

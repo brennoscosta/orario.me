@@ -4,6 +4,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb, schema } from "@/db";
+import { readFieldValues } from "@/lib/activity-fields";
 import { createSession, destroyOtherSessions, destroySession, getUser, hashPassword, verifyPassword } from "@/lib/auth";
 import { getDict } from "@/lib/i18n";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
@@ -123,9 +124,9 @@ export async function saveActivity(_prev: FormState, form: FormData): Promise<Fo
 
   const id = field(form, "id", 40);
   const title = field(form, "title", 120);
-  const location = field(form, "location", 160);
-  const notes = field(form, "notes", 1000);
+  const details = readFieldValues(form);
   if (!title) return fail(form, t.titleRequired);
+  if (details.missing) return fail(form, `${t.fieldRequired} ${details.missing.label[locale]}`);
   const startsAt = zonedToUtc(field(form, "date", 10), field(form, "time", 5), user.timezone);
   if (!startsAt) return fail(form, t.dateInvalid);
   const wanted = readReminders(form);
@@ -146,7 +147,7 @@ export async function saveActivity(_prev: FormState, form: FormData): Promise<Fo
         const sameTime = current.startsAt.getTime() === startsAt.getTime();
         await tx
           .update(schema.activities)
-          .set({ title, location: location || null, notes: notes || null, startsAt })
+          .set({ ...details.values, title, startsAt })
           .where(eq(schema.activities.id, id));
         if (sameTime) {
           // Reminders already delivered stay as they are when still requested.
@@ -175,7 +176,7 @@ export async function saveActivity(_prev: FormState, form: FormData): Promise<Fo
       } else {
         const [created] = await tx
           .insert(schema.activities)
-          .values({ userId: user.id, title, location: location || null, notes: notes || null, startsAt })
+          .values({ ...details.values, userId: user.id, title, startsAt })
           .returning({ id: schema.activities.id });
         activityId = created.id;
       }
@@ -236,9 +237,15 @@ export async function saveSettings(_prev: FormState, form: FormData): Promise<Fo
   if (phoneRaw && !phone) return fail(form, t.phoneInvalid);
   if (!timezone || !isValidTimezone(timezone)) return fail(form, t.timezoneInvalid);
   const newLocale = isLocale(language) ? language : locale;
+  const dailyDigest = form.get("dailyDigest") === "on";
+  const hour = Number(field(form, "digestHour", 2));
+  const digestHour = Number.isInteger(hour) && hour >= 0 && hour <= 23 ? hour : user.digestHour;
 
   try {
-    await getDb().update(schema.users).set({ name, phone, timezone, locale: newLocale }).where(eq(schema.users.id, user.id));
+    await getDb()
+      .update(schema.users)
+      .set({ name, phone, timezone, locale: newLocale, dailyDigest, digestHour })
+      .where(eq(schema.users.id, user.id));
   } catch (err) {
     console.error("[orario] saveSettings failed:", err);
     return fail(form, t.generic);

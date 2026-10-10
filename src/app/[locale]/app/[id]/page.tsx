@@ -37,7 +37,7 @@ export default async function EditActivityPage({ params }: { params: Promise<{ l
     .orderBy(asc(schema.reminders.sendAt));
 
   const dict = getDict(locale);
-  const options = await activityFormOptions(locale, dict, user);
+  const options = await activityFormOptions(locale, dict, user, activity);
   return (
     <main id="main" className="sheet sheet--wide">
       <h1 className="display">{dict.form.titleEdit}</h1>
@@ -47,13 +47,12 @@ export default async function EditActivityPage({ params }: { params: Promise<{ l
         offsets={options.offsets}
         channels={options.channels}
         maxReminders={MAX_REMINDERS_PER_ACTIVITY}
+        fields={options.fields}
         initial={{
           id: activity.id,
           title: activity.title,
           date: dayKey(activity.startsAt, user.timezone),
           time: inputTime(activity.startsAt, user.timezone),
-          location: activity.location ?? "",
-          notes: activity.notes ?? "",
           reminders: reminders.map((r) => ({ offset: String(r.offsetMinutes), channel: r.channel })),
         }}
         note={

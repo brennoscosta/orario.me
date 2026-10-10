@@ -1,12 +1,21 @@
 import "server-only";
-import type { User } from "@/db/schema";
+import type { Activity, User } from "@/db/schema";
+import { activityFields, fieldFormValue, fieldName } from "./activity-fields";
 import { configuredChannels } from "./channels";
 import type { Dictionary } from "./i18n";
 import type { Locale } from "./i18n/config";
 import { offsetLabel } from "./i18n/labels";
 import { channels, offsetOptions } from "./plans";
 
-export async function activityFormOptions(locale: Locale, dict: Dictionary, user: User) {
+export async function activityFormOptions(locale: Locale, dict: Dictionary, user: User, activity: Activity | null = null) {
+  const fields = activityFields().map((f) => ({
+    name: fieldName(f.key),
+    label: f.label[locale],
+    input: f.input,
+    required: f.required,
+    maxLength: f.maxLength,
+    value: fieldFormValue(activity, f),
+  }));
   const available = await configuredChannels();
   const offsets = offsetOptions.map((m) => ({ value: String(m), label: offsetLabel(m, locale) }));
   const channelOptions = channels.map((c) => {
@@ -22,6 +31,7 @@ export async function activityFormOptions(locale: Locale, dict: Dictionary, user
   const t = dict.form;
   return {
     offsets,
+    fields,
     channels: channelOptions,
     phoneNeeded,
     strings: {
@@ -29,8 +39,7 @@ export async function activityFormOptions(locale: Locale, dict: Dictionary, user
       titlePlaceholder: t.titlePlaceholder,
       date: t.date,
       time: t.time,
-      location: t.location,
-      notes: t.notes,
+      optional: t.optional,
       reminders: t.reminders,
       remindersHint: t.remindersHint,
       when: t.when,

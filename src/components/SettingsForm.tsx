@@ -10,6 +10,9 @@ type Strings = {
   phoneHint: string;
   timezone: string;
   language: string;
+  digest: string;
+  digestHint: string;
+  digestHour: string;
   save: string;
   saved: string;
   pending: string;
@@ -19,7 +22,7 @@ export function SettingsForm(props: {
   locale: string;
   t: Strings;
   timezones: string[];
-  initial: { name: string; email: string; phone: string; timezone: string; language: string };
+  initial: { name: string; email: string; phone: string; timezone: string; language: string; dailyDigest: boolean; digestHour: number };
   justSaved: boolean;
 }) {
   const { locale, t, timezones, initial, justSaved } = props;
@@ -71,6 +74,30 @@ export function SettingsForm(props: {
             <option value="en">English</option>
           </select>
         </div>
+      </div>
+      <div className="field">
+        <label className="check">
+          <input
+            type="checkbox"
+            name="dailyDigest"
+            defaultChecked={state.values ? state.values.dailyDigest === "on" : initial.dailyDigest}
+            aria-describedby="digest-hint"
+          />{" "}
+          {t.digest}
+        </label>
+        <span id="digest-hint" className="hint">
+          {t.digestHint}
+        </span>
+      </div>
+      <div className="field" style={{ maxWidth: "14rem" }}>
+        <label htmlFor="digestHour">{t.digestHour}</label>
+        <select id="digestHour" name="digestHour" className="input" defaultValue={state.values?.digestHour ?? String(initial.digestHour)}>
+          {Array.from({ length: 24 }, (_, h) => (
+            <option key={h} value={h}>
+              {String(h).padStart(2, "0")}:00
+            </option>
+          ))}
+        </select>
       </div>
       <div className="form-actions">
         <button type="submit" className="button" disabled={pending}>

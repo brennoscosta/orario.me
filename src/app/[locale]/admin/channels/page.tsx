@@ -11,23 +11,39 @@ export default async function AdminChannels() {
     <>
       <ChannelCard
         channel="email"
-        title="Email (SMTP)"
-        description="Usado para os avisos por email e como reserva quando WhatsApp ou SMS não podem ser usados."
+        title="Email"
+        description="Usado para os avisos por email, a contagem regressiva diária e como reserva quando WhatsApp ou SMS não podem ser usados."
         ready={isReady(config, "email")}
         enabled={config.email.enabled}
         testLabel={`Enviar email de teste para ${admin.email}`}
         fields={[
-          { name: "host", label: "Servidor SMTP", value: config.email.host, placeholder: "smtp.seuprovedor.com" },
-          { name: "port", label: "Porta", value: String(config.email.port), hint: "587 (STARTTLS) ou 465 (SSL)." },
-          { name: "user", label: "Usuário", value: config.email.user },
-          { name: "pass", label: "Senha", secret: true, saved: Boolean(config.email.pass) },
+          {
+            name: "provider",
+            label: "Enviar por",
+            value: config.email.provider,
+            options: [
+              { value: "sendgrid", label: "SendGrid" },
+              { value: "smtp", label: "Servidor SMTP" },
+            ],
+          },
           {
             name: "from",
             label: "Remetente",
             value: config.email.from,
             placeholder: "Orario <lembretes@orario.me>",
-            hint: "O endereço precisa ser aceito pelo seu provedor SMTP.",
+            hint: "No SendGrid, este endereço precisa estar verificado (Sender Authentication).",
           },
+          {
+            name: "sendgridKey",
+            label: "Chave da API do SendGrid",
+            secret: true,
+            saved: Boolean(config.email.sendgridKey),
+            hint: "Crie em SendGrid → Settings → API Keys, com permissão Mail Send.",
+          },
+          { name: "host", label: "Servidor SMTP", value: config.email.host, placeholder: "smtp.seuprovedor.com", hint: "Os campos SMTP só valem quando o envio é por servidor SMTP." },
+          { name: "port", label: "Porta SMTP", value: String(config.email.port), hint: "587 (STARTTLS) ou 465 (SSL)." },
+          { name: "user", label: "Usuário SMTP", value: config.email.user },
+          { name: "pass", label: "Senha SMTP", secret: true, saved: Boolean(config.email.pass) },
         ]}
       />
       <ChannelCard

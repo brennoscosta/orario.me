@@ -2,7 +2,9 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { getDb, getSql, schema } from "@/db";
 import type { Activity, User } from "@/db/schema";
+import { loadExtraDetails } from "./activity-fields";
 import { configuredChannels, sendEmail, sendSms, sendWhatsApp } from "./channels";
+import { countdownTick } from "./countdown";
 import { isLocale, type Locale } from "./i18n/config";
 import { reminderMessage } from "./i18n/messages";
 import { monthlyLimit } from "./limits";
@@ -36,7 +38,8 @@ async function resolveChannel(user: User, wanted: Channel): Promise<{ channel: C
 
 async function deliver(user: User, activity: Activity, channel: Channel, offsetMinutes: number): Promise<void> {
   const locale: Locale = isLocale(user.locale) ? user.locale : "pt";
-  const msg = reminderMessage({ locale, user, activity, offsetMinutes });
+  const extras = (await loadExtraDetails([activity.id], locale)).get(activity.id);
+  const msg = reminderMessage({ locale, user, activity, offsetMinutes, extras });
   if (channel === "email") await sendEmail({ to: user.email, subject: msg.subject, text: msg.text, html: msg.html });
   else if (channel === "whatsapp") await sendWhatsApp(user.phone!, msg.text);
   else await sendSms(user.phone!, msg.short);
@@ -109,6 +112,7 @@ export function startScheduler(): void {
   if (globalForScheduler.__orarioScheduler) return;
   globalForScheduler.__orarioScheduler = true;
   let running = false;
+  let lastCountdown = 0;
   const run = async () => {
     if (running) return;
     running = true;
@@ -116,6 +120,15 @@ export function startScheduler(): void {
       await tick();
     } catch (err) {
       console.error("[orario] scheduler tick failed:", (err as Error).message);
+    }
+    try {
+      // Countdown emails are checked once a minute.
+      if (Date.now() - lastCountdown >= 60_000) {
+        lastCountdown = Date.now();
+        await countdownTick();
+      }
+    } catch (err) {
+      console.error("[orario] countdown tick failed:", (err as Error).message);
     } finally {
       running = false;
     }

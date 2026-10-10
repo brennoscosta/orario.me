@@ -13,6 +13,8 @@ export type ChannelField = {
   secret?: boolean;
   saved?: boolean;
   type?: string;
+  /** Renders a select instead of a text input. */
+  options?: { value: string; label: string }[];
 };
 
 function Feedback({ state }: { state: AdminState }) {
@@ -47,16 +49,26 @@ export function ChannelCard(props: {
           {fields.map((f) => (
             <div className="field" key={f.name}>
               <label htmlFor={`${channel}-${f.name}`}>{f.label}</label>
-              <input
-                id={`${channel}-${f.name}`}
-                name={f.name}
-                className="input"
-                type={f.secret ? "password" : (f.type ?? "text")}
-                defaultValue={f.secret ? "" : f.value}
-                placeholder={f.secret ? (f.saved ? "Salvo. Deixe em branco para manter." : "") : f.placeholder}
-                autoComplete="off"
-                spellCheck={false}
-              />
+              {f.options ? (
+                <select id={`${channel}-${f.name}`} name={f.name} className="input" defaultValue={f.value}>
+                  {f.options.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={`${channel}-${f.name}`}
+                  name={f.name}
+                  className="input"
+                  type={f.secret ? "password" : (f.type ?? "text")}
+                  defaultValue={f.secret ? "" : f.value}
+                  placeholder={f.secret ? (f.saved ? "Salvo. Deixe em branco para manter." : "") : f.placeholder}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              )}
               {f.hint && <span className="hint">{f.hint}</span>}
             </div>
           ))}

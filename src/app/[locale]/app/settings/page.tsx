@@ -47,6 +47,8 @@ export default async function SettingsPage({
           phone: user.phone ?? "",
           timezone: user.timezone,
           language: user.locale,
+          dailyDigest: user.dailyDigest,
+          digestHour: user.digestHour,
         }}
         t={{
           name: t.name,
@@ -55,6 +57,9 @@ export default async function SettingsPage({
           phoneHint: t.phoneHint,
           timezone: t.timezone,
           language: t.language,
+          digest: t.digest,
+          digestHint: t.digestHint,
+          digestHour: t.digestHour,
           save: t.save,
           saved: t.saved,
           pending: dict.auth.pending,

@@ -9,8 +9,7 @@ export type ActivityFormStrings = {
   titlePlaceholder: string;
   date: string;
   time: string;
-  location: string;
-  notes: string;
+  optional: string;
   reminders: string;
   remindersHint: string;
   when: string;
@@ -25,13 +24,21 @@ export type ActivityFormStrings = {
 type Option = { value: string; label: string; disabled?: boolean };
 type ReminderRow = { key: number; offset: string; channel: string };
 
+/** A detail field of the appointment, described by the server (see activity-fields.ts). */
+export type FormField = {
+  name: string;
+  label: string;
+  input: "text" | "textarea" | "number" | "checkbox" | "datetime";
+  required: boolean;
+  maxLength: number;
+  value: string;
+};
+
 export type ActivityInitial = {
   id?: string;
   title: string;
   date: string;
   time: string;
-  location: string;
-  notes: string;
   reminders: { offset: string; channel: string }[];
 };
 
@@ -42,9 +49,10 @@ export function ActivityForm(props: {
   channels: Option[];
   maxReminders: number;
   initial: ActivityInitial;
+  fields: FormField[];
   note?: React.ReactNode;
 }) {
-  const { locale, t, offsets, channels, maxReminders, initial, note } = props;
+  const { locale, t, offsets, channels, maxReminders, initial, fields, note } = props;
   const [state, action, pending] = useActionState<FormState, FormData>(saveActivity, {});
   const [rows, setRows] = useState<ReminderRow[]>(() => initial.reminders.map((r, i) => ({ key: i, ...r })));
   const [nextKey, setNextKey] = useState(initial.reminders.length);
@@ -77,14 +85,36 @@ export function ActivityForm(props: {
           <input id="time" name="time" type="time" className="input" required defaultValue={v.time} />
         </div>
       </div>
-      <div className="field">
-        <label htmlFor="location">{t.location}</label>
-        <input id="location" name="location" className="input" maxLength={160} defaultValue={v.location} />
-      </div>
-      <div className="field">
-        <label htmlFor="notes">{t.notes}</label>
-        <textarea id="notes" name="notes" className="input" maxLength={1000} defaultValue={v.notes} />
-      </div>
+      {fields.map((f) => {
+        const value = state.values ? (state.values[f.name] ?? "") : f.value;
+        const label = f.required || f.input === "checkbox" ? f.label : `${f.label} ${t.optional}`;
+        if (f.input === "checkbox") {
+          return (
+            <label className="check" key={f.name}>
+              <input type="checkbox" name={f.name} defaultChecked={value === "on"} /> {label}
+            </label>
+          );
+        }
+        return (
+          <div className="field" key={f.name}>
+            <label htmlFor={f.name}>{label}</label>
+            {f.input === "textarea" ? (
+              <textarea id={f.name} name={f.name} className="input" maxLength={f.maxLength} required={f.required} defaultValue={value} />
+            ) : (
+              <input
+                id={f.name}
+                name={f.name}
+                className="input"
+                type={f.input === "number" ? "number" : f.input === "datetime" ? "datetime-local" : "text"}
+                step={f.input === "number" ? "any" : undefined}
+                maxLength={f.input === "text" ? f.maxLength : undefined}
+                required={f.required}
+                defaultValue={value}
+              />
+            )}
+          </div>
+        );
+      })}
 
       <fieldset>
         <legend className="legend">{t.reminders}</legend>
